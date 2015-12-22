@@ -17,6 +17,8 @@ namespace OSharp.Web.Http.Authentication
 {
     public class TokenAuthAttribute : AuthorizeAttribute
     {
+        public bool AllowAnonymous = false;
+
         /// <summary>
         /// 重写身份验证方法
         /// </summary>
@@ -27,17 +29,18 @@ namespace OSharp.Web.Http.Authentication
             try
             {
                 string token = httpContext.Request.Headers.GetValues(HttpHeaderNames.OSharpAuthenticationToken).FirstOrDefault();
-                if (token.IsNullOrWhiteSpace()) return false;
+                if (token.IsNullOrWhiteSpace()) return AllowAnonymous;
 
                 var strAuth = DesHelper.Decrypt(token, Constants.BodeAuthDesKey);
                 Operator user = strAuth.FromJsonString<Operator>() ?? new Operator();
                 OSharpContext.Current.SetOperator(user);
 
+                if (AllowAnonymous) return true;
                 return int.Parse(user.UserId) > 0 && user.ValidatePeriod > DateTime.Now;
             }
             catch
             {
-                return false;
+                return AllowAnonymous;
             }
         }
 
