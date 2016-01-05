@@ -10,13 +10,13 @@ using OSharp.Core;
 using OSharp.Core.Caching;
 using OSharp.Core.Dependency;
 using OSharp.Logging.Log4Net;
-using OSharp.SiteBase.Initialize;
 using OSharp.Web.Http.Caching;
 using OSharp.Web.Http.Handlers;
-using OSharp.Web.Http.Initialize;
-using OSharp.Web.Mvc.Initialize;
 using OSharp.Web.Mvc.Routing;
 using Bode.Sms.Md;
+using OSharp.Web.Http.Context;
+using Bode.Services.Implement;
+using Bode.Push.Jpush;
 
 namespace Bode.Web
 {
@@ -48,6 +48,7 @@ namespace Bode.Web
         private static void DelegatingHandlerRegister(HttpConfiguration config)
         {
             // Web API 配置和服务
+            config.MessageHandlers.Add(new RequestInitHandler());
             config.MessageHandlers.Add(new ThrottlingHandler(new InMemoryThrottleStore(), id => 60, TimeSpan.FromMinutes(1)));
         }
 
@@ -60,12 +61,13 @@ namespace Bode.Web
             IServiceCollection services = builder.Build();
             services.AddLog4NetServices();
             services.AddDataServices();
+            services.AddImplementServices();
             services.AddMdSmsServices();
+            services.AddJPushServices();
 
             IFrameworkInitializer initializer = new FrameworkInitializer();
             initializer.Initialize(new MvcAutofacIocBuilder(services));
             initializer.Initialize(new WebApiAutofacIocBuilder(services));
-            //initializer.Initialize(new SignalRAutofacIocBuilder(services));
         }
     }
 }
