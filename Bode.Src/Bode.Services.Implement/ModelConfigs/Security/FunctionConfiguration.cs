@@ -16,5 +16,6 @@ namespace Bode.Services.Implement.ModelConfigs.Security
     /// 实体映射类——功能信息
     /// </summary>
     public class FunctionConfiguration : EntityConfigurationBase<Function, Guid>
-    { }
+    {
+    }
 }
